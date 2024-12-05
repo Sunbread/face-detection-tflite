@@ -4,6 +4,7 @@
 from enum import IntEnum
 from typing import List, Optional, Sequence, Tuple, Union
 import numpy as np
+import math
 from PIL import Image
 from PIL.Image import Image as PILImage, Resampling, Transform, Transpose
 from fdlite import ArgumentError, CoordinateRangeError, InvalidEnumError
@@ -189,7 +190,7 @@ def bbox_to_roi(
     """
     if not bbox.normalized:
         raise CoordinateRangeError('bbox must be normalized')
-    PI = np.math.pi
+    PI = math.pi
     TWO_PI = 2 * PI
     # select ROI dimensions
     width, height = _select_roi_size(bbox, image_size, size_mode)
@@ -202,9 +203,9 @@ def bbox_to_roi(
         return Rect(cx, cy, width, height, rotation=0., normalized=True)
     x0, y0 = rotation_keypoints[0]
     x1, y1 = rotation_keypoints[1]
-    angle = -np.math.atan2(y0 - y1, x1 - x0)
+    angle = -math.atan2(y0 - y1, x1 - x0)
     # normalise to [0, 2*PI]
-    rotation = angle - TWO_PI * np.math.floor((angle + PI) / TWO_PI)
+    rotation = angle - TWO_PI * math.floor((angle + PI) / TWO_PI)
     return Rect(cx, cy, width, height, rotation, normalized=True)
 
 
@@ -291,7 +292,7 @@ def project_landmarks(
         return [Landmark(x, y, z) for (x, y, z) in points]
     # coordinate system transformation from ROI- to image space
     norm_roi = roi.scaled(image_size, normalize=True)
-    sin, cos = np.math.sin(roi.rotation), np.math.cos(roi.rotation)
+    sin, cos = math.sin(roi.rotation), math.cos(roi.rotation)
     matrix = np.array([[cos, sin, 0.], [-sin, cos, 0.], [1., 1., 1.]])
     points -= (0.5, 0.5, 0.0)
     rotated = np.matmul(points * (1, 1, 0), matrix)
